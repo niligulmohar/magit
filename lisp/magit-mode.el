@@ -185,38 +185,34 @@ has to confirm each save."
 By default Magit removes the regular region overlay if, and only
 if, that region constitutes a valid selection as understood by
 Magit commands.  Otherwise it does not remove that overlay, and
-the region therefor looks like it would in other buffers.
+the region looks like it would in other buffers.
 
 There are two types of such valid selections: hunk-internal
 regions and regions that select two or more sibling sections.
 In such cases Magit removes the region overlay and instead
-highlights a slight larger range.  All text (for hunk-internal
+highlights a slightly larger range.  All text (for hunk-internal
 regions) or the headings of all sections (for sibling selections)
 that are inside that range (not just inside the region) are acted
 on by commands such as the staging command.  This buffer range
 begins at the beginning of the line on which the region begins
 and ends at the end of the line on which the region ends.
 
-Why we act on this larger range instead of the region, is beyond
-the scope of this doc-string, but let me assure you, that this
-was not done without careful consideration.  I also hope that
-you understand that, because Magit acts on the larger range and
-not the region, it is actually quite important to visualize that
-larger range, because if we don't do that, then one might think
-that these commands act on the region instead.
+Because Magit acts on this larger range and not the region, it is
+actually quite important to visualize that larger range.  If we
+don't do that, then one might think that these commands act on
+the region instead.  If you want to *also* visualize the region,
+then set this option to t.  But please note that when the region
+does *not* constitute a valid selection, then the region is
+*always* visualized as usual, and that it is usually under such
+circumstances that you want to use a non-magit command to act on
+the region.
 
-If you want to *also* visualize the region, then set this option
-to t.  But please note that when the region does *not* constitute
-a valid selection, then the region is *always* visualized as
-usual, and that it is usually under such circumstances that you
-want to use a non-magit command to act on the region.
-
-Besides keeping the region overlay, setting this option to t,
-also causes all face properties, except for `:foreground', of
-the faces that are used to highlight the headings of selected
-sections, to be ignored.  This avoids the worst conflicts that
-result from displaying the region and the selection overlays at
-the same time.  We are not interested in dealing with any other
+Besides keeping the region overlay, setting this option to t also
+causes all face properties, except for `:foreground', to be
+ignored for the faces used to highlight headings of selected
+sections.  This avoids the worst conflicts that result from
+displaying the region and the selection overlays at the same
+time.  We are not interested in dealing with any other
 conflicts.  (In fact we *already* provide a way to avoid all of
 these conflicts: *not* changing the value of this option.)"
   :package-version '(magit . "2.2.0")
