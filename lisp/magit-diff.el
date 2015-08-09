@@ -1490,9 +1490,16 @@ Staging and applying changes is documented in info node
 (defun magit-revision-refresh-buffer (commit _const args files)
   (magit-insert-section (commitbuf)
     (magit-git-wash #'magit-diff-wash-revision
-      "show" "-p" "--cc" "--decorate=full" "--format=fuller" "--no-prefix"
+      "show" "-p" "--cc" "--decorate=full" "--no-prefix" "--format=tformat:\
+commit %H
+Author:     %aN <%aE>
+AuthorDate: %ad
+Commit:     %cN <%cE>
+CommitDate: %cd
+
+%B%x1D%N%x1D"
       (and magit-revision-show-diffstat "--stat")
-      (and magit-revision-show-notes "--notes")
+      "--notes" ;(and magit-revision-show-notes "--notes")
       args commit "--" files)))
 
 (defun magit-diff-wash-revision (args)
@@ -1512,29 +1519,27 @@ Staging and applying changes is documented in info node
           (when (string-equal (match-string 1) "Merge")
             (magit-delete-line))
           (forward-line 1))
-        (re-search-forward "^\\(\\(---\\)\\|    .\\)")
-        (goto-char (line-beginning-position))
-        (if (match-string 2)
-            (progn (magit-delete-match)
-                   (insert ?\n)
-                   (magit-insert-section (message)
-                     (insert "    (no message)\n")))
-          (let ((bound (save-excursion
-                         (when (re-search-forward "^diff" nil t)
-                           (copy-marker (match-beginning 0)))))
-                (summary (buffer-substring-no-properties
-                          (point) (line-end-position))))
-            (magit-delete-line)
-            (magit-insert-section (message)
-              (insert summary ?\n)
-              (magit-insert-heading)
-              (cond ((re-search-forward "^---" bound t)
-                     (magit-delete-match))
-                    ((re-search-forward "^.[^ ]" bound t)
-                     (goto-char (1- (match-beginning 0))))))))
-        (forward-line)
+        (forward-line 1)
+        (magit-insert-section (message)
+          (if (looking-at "\C-]")
+              (insert "(no message)")
+            (forward-line 1))
+          (magit-insert-heading)
+          (re-search-forward "\C-]")
+          (replace-match ""))
+        (if (looking-at "\C-]")
+            (progn (replace-match "")
+                   (forward-line 1))
+          (magit-insert-section (n)
+            (forward-line 1)
+            (magit-insert-heading)
+            (re-search-forward "\C-]")
+            (replace-match "")))
+        (insert "\n")
         (when magit-revision-insert-related-refs
           (magit-revision-insert-related-refs rev))
+        (when (looking-at "---\n")
+          (magit-delete-match))
         (setq children (magit-diff-wash-diffstat))
         (forward-line)))
     (magit-diff-wash-diffs args children)))
